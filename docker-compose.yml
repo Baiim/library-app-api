@@ -1,0 +1,121 @@
+version: '3.8'
+
+volumes:
+  mongo_data1:
+    external: true
+  mongo_data2:
+    external: true
+  mongo_data3:
+    external: true
+  media:
+  redis-vol:
+
+services:
+  temp-instance:
+    container_name: temp-instance
+    image: mongo:4.4
+    volumes:
+      - ./init-mongo-db:/docker-entrypoint-initdb.d
+    networks:
+      - libraryapp-network
+
+  primary:
+    container_name: primary
+    image: mongo:4.4
+    volumes:
+      - mongo_data1:/data/db
+      - ./keys/mongo-replica-set.key:/data/db/mongo-replica-set.key
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+    networks:
+      - libraryapp-network
+    restart:
+      always
+    command:
+      - "--replSet"
+      - "dbrs"
+      - "--keyFile"
+      - "/data/db/mongo-replica-set.key"
+
+  replica01:
+    container_name: replica01
+    image: mongo:4.4
+    volumes:
+      - mongo_data2:/data/db
+      - ./keys/mongo-replica-set.key:/data/db/mongo-replica-set.key
+    ports:
+      - "27027:27017"
+    networks:
+      - libraryapp-network
+    command:
+      - "--replSet"
+      - "dbrs"
+      - "--keyFile"
+      - "/data/db/mongo-replica-set.key"
+
+  replica02:
+    container_name: replica02
+    image: mongo:4.4
+    volumes:
+      - mongo_data3:/data/db
+      - ./keys/mongo-replica-set.key:/data/db/mongo-replica-set.key
+    ports:
+      - "27037:27017"
+    networks:
+      - libraryapp-network
+    command:
+      - "--replSet"
+      - "dbrs"
+      - "--keyFile"
+      - "/data/db/mongo-replica-set.key"
+
+  redis_cache:
+    container_name: redis_client
+    image: redis:latest
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server
+    volumes: 
+      - redis-vol:/data
+    networks:
+      - libraryapp-network
+
+  apilibraryapp:
+    container_name: apilibraryapp
+    image: api-library-app
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - '8082:8082'
+    volumes:
+      - /Users/trihariyadi/Projects/nodejs/library-app-api/public/assets/books/:/app/public/assets/books
+      - /Users/trihariyadi/Projects/nodejs/library-app-api/public/assets/news/:/app/public/assets/news
+      - /Users/trihariyadi/Projects/nodejs/library-app-api/public/assets/transactions/:/app/public/assets/transactions
+      - /Users/trihariyadi/Projects/nodejs/library-app-api/public/assets/users/:/app/public/assets/users
+      # the volume above prevents our host system's node_modules to be mounted
+      - media:/app/node_modules/
+    depends_on:
+      - primary
+      - replica01
+      - replica02
+      - temp-instance
+      - redis_cache
+    env_file: .env
+    environment:
+      - NODE_ENV=production
+      - PORT=$PORT
+      - REFRESH_TOKEN_SECRET=$REFRESH_TOKEN_SECRET
+      - ACCESS_TOKEN_SECRET=$ACCESS_TOKEN_SECRET
+      - API_KEY=$API_KEY
+      - MONGODB_URI=$MONGODB_URI
+      - API_BASE_URl=$API_BASE_URl
+    networks:
+      - libraryapp-network
+
+networks:
+  libraryapp-network:

@@ -1,4 +1,9 @@
 /node_modules
 /build
+/public/assets/users
+/public/assets/books
+/public/assets/transactions
+/public/assets/news
+
 .env
 package-lock.json

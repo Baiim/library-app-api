@@ -6,6 +6,7 @@
   "scripts": {
     "tsc": "rm -rf build/ && tsc",
     "ts": "rm -rf build/ && tsc -w",
+    "build-dev": "tsc -p . -w",
     "build": "tsc -b",
     "dev": "nodemon ./build/server.js",
     "start": "NODE_ENV=production node app.js",
@@ -29,7 +30,8 @@
     "helmet": "^6.0.1",
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^7.0.2",
-    "multer": "^1.4.5-lts.1"
+    "multer": "^1.4.5-lts.1",
+    "redis": "^4.6.5"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",
@@ -43,9 +45,12 @@
     "@typescript-eslint/eslint-plugin": "^5.55.0",
     "@typescript-eslint/parser": "^5.55.0",
     "eslint": "^8.36.0",
+    "eslint-config-prettier": "^8.7.0",
     "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-prettier": "^4.2.1",
     "morgan": "^1.10.0",
     "nodemon": "^2.0.21",
+    "prettier": "^2.8.4",
     "typescript": "^5.0.2"
   }
 }

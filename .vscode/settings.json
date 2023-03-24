@@ -1,0 +1,16 @@
+{
+    "editor.tabSize": 4,
+    "editor.minimap.enabled": false,
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "eslint.format.enable": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    },
+    "eslint.validate": ["javascript", "typescript", "javascriptreact", "html", "typescriptreact"],
+    "eslint.probe": ["javascript", "javascriptreact", "vue"],
+    "emmet.triggerExpansionOnTab": true,
+    "[javascriptreact]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
+}
