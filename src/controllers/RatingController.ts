@@ -1,9 +1,10 @@
 import {Request, Response, NextFunction} from 'express';
+import mongoose from 'mongoose';
 import Rating, {RatingInput} from '../models/RatingModel';
 import IRating from '../interfaces/controller.rating.interface';
 import responseSuccess from '../utils/responseSuccess';
 import Helper from '../utils/Helper';
-import {BadRequestException, InternalServerErrException} from '../exceptions/ResponseException';
+import {BadRequestException, InternalServerErrException, NotFoundException} from '../exceptions/ResponseException';
 
 class RatingController implements IRating {
     async create(req: Request, resp: Response, next: NextFunction): Promise<void> {
@@ -27,6 +28,7 @@ class RatingController implements IRating {
         try {
             const {id, page = 1, limit = 10} = req.query;
             const ratings = await Rating.find({id_book: id})
+                .select('-_id -__v')
                 .limit((limit as number) * 1)
                 .skip(((page as number) - 1) * (limit as number))
                 .sort('-createdAt');
@@ -47,15 +49,29 @@ class RatingController implements IRating {
     async getRatingAverage(req: Request, resp: Response, next: NextFunction): Promise<void> {
         try {
             const {id} = req.params;
-            const sumRating = await Rating.count({id_book: id});
-            const ratings = await Rating.find({id_book: id});
+            const ratings = await Rating.aggregate([
+                {
+                    $match: {
+                        id_book: new mongoose.Types.ObjectId(id),
+                    },
+                },
+                {
+                    $group: {
+                        _id: null,
+                        avgRating: {$avg: '$size'},
+                    },
+                },
+                {
+                    $project: {
+                        avgRating: {$trunc: ['$avgRating', 1]},
+                    },
+                },
+                {$unset: '_id'},
+            ]);
             if (!ratings) {
-                throw new Error();
+                next(new NotFoundException('Belum ada penilaian'));
             }
-            const result = {
-                ratingAverage: sumRating / ratings.length || 0,
-            };
-            resp.status(200).send(responseSuccess(result));
+            resp.status(200).send(responseSuccess(ratings?.[0]));
         } catch (error) {
             Helper.logger(error);
             next(new InternalServerErrException());

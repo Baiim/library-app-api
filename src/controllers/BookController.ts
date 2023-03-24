@@ -1,5 +1,6 @@
 import {unlinkSync} from 'fs';
 import {Request, Response, NextFunction} from 'express';
+import mongoose from 'mongoose';
 import IBook from '../interfaces/controller.book.interface';
 import Book, {BookInput} from '../models/BookModel';
 import responseSuccess from '../utils/responseSuccess';
@@ -133,10 +134,10 @@ class BookController implements IBook {
     async getAll(req: Request, resp: Response, next: NextFunction): Promise<void> {
         try {
             const {page = 1, limit = 10} = req.query;
-            const books = await Book.find({}, '-__v')
+            const books = await Book.find()
+                .select('title author year imgUrl publisher')
                 .limit((limit as number) * 1)
                 .skip(((page as number) - 1) * (limit as number))
-                .select('title author year imgUrl')
                 .sort('-createdAt');
             const count = await Book.countDocuments();
             resp.status(200).send(
@@ -156,6 +157,7 @@ class BookController implements IBook {
         try {
             const {id} = req.params;
             await Book.findOne({_id: id}, '-__v')
+                .populate('id_category', 'name -_id')
                 .exec()
                 .then((result) => {
                     if (result) {
@@ -180,7 +182,7 @@ class BookController implements IBook {
                 {
                     $match: {
                         $expr: {
-                            $and: [{$in: [id, '$id_category']}],
+                            $and: [{$in: [new mongoose.Types.ObjectId(id), '$id_category']}],
                         },
                     },
                 },

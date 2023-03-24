@@ -51,7 +51,7 @@ class CategoryController implements ICategory {
 
     async getAll(req: Request, resp: Response, next: NextFunction): Promise<void> {
         try {
-            await Category.find({}, '-__v')
+            await Category.find({}, '-__v -createdAt -updatedAt')
                 .exec()
                 .then((result) => {
                     if (result?.length) {

@@ -22,7 +22,7 @@ const ratingSchema = new Schema(
             required: [true, 'Rating harus diisi'],
             validate: {
                 validator: function (v: number) {
-                    return v < 5;
+                    return v <= 5;
                 },
                 message: 'Skor rating yang diberikan maksimum 5',
             },
