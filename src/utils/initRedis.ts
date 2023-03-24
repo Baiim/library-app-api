@@ -1,5 +1,16 @@
 /* eslint-disable no-console */
 import * as redis from 'redis';
+import {config as dotenv} from 'dotenv';
+
+dotenv();
+const NODE_ENV = process.env.NODE_ENV as string;
+console.log('NODE_ENV', NODE_ENV);
+
+const socket = NODE_ENV === 'production' ? {host: 'redis_client'} : {port: 6379, host: '127.0.0.1'};
+
+const client = redis.createClient({
+    socket,
+});
 
 // const client = redis.createClient({
 //     socket: {
@@ -7,12 +18,6 @@ import * as redis from 'redis';
 //         host: '127.0.0.1',
 //     },
 // });
-
-const client = redis.createClient({
-    socket: {
-        host: 'redis_client',
-    },
-});
 
 (async () => {
     await client.connect();

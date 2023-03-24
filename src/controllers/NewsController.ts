@@ -22,6 +22,7 @@ class NewsController implements INews {
             await news.save();
             resp.status(200).send(responseSuccess());
         } catch (error) {
+            Helper.logger(error);
             const errorData = Helper.getErrorData(error);
             if (req.file) {
                 unlinkSync(`public/assets/news/${req.file?.filename}`);
@@ -50,6 +51,7 @@ class NewsController implements INews {
                 })
             );
         } catch (error) {
+            Helper.logger(error);
             next(new InternalServerErrException());
         }
     }
@@ -88,6 +90,7 @@ class NewsController implements INews {
                     throw error;
                 });
         } catch (error) {
+            Helper.logger(error);
             const errorData = Helper.getErrorData(error);
             if (req.file) {
                 unlinkSync(`public/assets/news/${req.file?.filename}`);
@@ -121,6 +124,7 @@ class NewsController implements INews {
                     throw error;
                 });
         } catch (error) {
+            Helper.logger(error);
             next(new InternalServerErrException());
         }
     }

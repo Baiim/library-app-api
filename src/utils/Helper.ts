@@ -154,6 +154,17 @@ class Helper {
     public getErrorMessage(error: unknown) {
         return this.toErrorWithMessage(error).message;
     }
+
+    public logger(error: unknown) {
+        const errInfo = `\x1b[33m[Error Log]: ==> \x1b[31m${this.getErrorMessage(error)}`;
+        // eslint-disable-next-line no-console
+        console.log('');
+        // eslint-disable-next-line no-console
+        console.log(errInfo);
+        // eslint-disable-next-line no-console
+        console.log('');
+        return this.toErrorWithMessage(error).message;
+    }
 }
 
 export default new Helper();

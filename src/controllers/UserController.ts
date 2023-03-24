@@ -27,6 +27,7 @@ class UserController implements IUserController {
             await user.save();
             resp.status(200).send(responseSuccess(null));
         } catch (error) {
+            Helper.logger(error);
             const errorData = Helper.getErrorData(error);
             if (req.file) {
                 unlinkSync(`public/assets/users/${req.file?.filename}`);
@@ -55,9 +56,12 @@ class UserController implements IUserController {
                 new JwtSign(result)
                     .createToken()
                     .then((response) => resp.status(200).send(responseSuccess(response)))
-                    .catch(() => next(new InternalServerErrException()));
+                    .catch((error) => {
+                        throw error;
+                    });
             });
         } catch (error) {
+            Helper.logger(error);
             const errorData = Helper.getErrorData(error);
             if (errorData?.name === 'ValidationError') {
                 next(new BadRequestException(errorData.error[0]));
@@ -94,18 +98,23 @@ class UserController implements IUserController {
                         resp.status(200).send(responseSuccess(null));
                         return;
                     }
-                    next(new NotFoundException('User tidak ditemukan'));
+                    throw new Error('notfound');
                 })
                 .catch((error) => {
                     throw error;
                 });
         } catch (error) {
+            Helper.logger(error);
             const errorData = Helper.getErrorData(error);
             if (req.file) {
                 unlinkSync(`public/assets/users/${req.file?.filename}`);
             }
             if (errorData?.name === 'ValidationError') {
                 next(new BadRequestException(errorData.error[0]));
+                return;
+            }
+            if (Helper.getErrorMessage(error) === 'notfound') {
+                next(new NotFoundException('User tidak ditemukan'));
                 return;
             }
             next(new InternalServerErrException());
@@ -133,6 +142,7 @@ class UserController implements IUserController {
                     throw error;
                 });
         } catch (error) {
+            Helper.logger(error);
             next(new InternalServerErrException());
         }
     }
@@ -147,6 +157,7 @@ class UserController implements IUserController {
             }
             next(new NotFoundException('User tidak ditemukan'));
         } catch (error) {
+            Helper.logger(error);
             next(new InternalServerErrException());
         }
     }
@@ -166,6 +177,7 @@ class UserController implements IUserController {
                     throw error;
                 });
         } catch (error) {
+            Helper.logger(error);
             next(new InternalServerErrException());
         }
     }
@@ -182,6 +194,7 @@ class UserController implements IUserController {
                     throw error;
                 });
         } catch (error) {
+            Helper.logger(error);
             const message = Helper.getErrorMessage(error);
             next(new InternalServerErrException(message));
         }

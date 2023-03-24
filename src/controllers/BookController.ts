@@ -37,6 +37,7 @@ class BookController implements IBook {
             await book.save();
             resp.status(200).send(responseSuccess(null));
         } catch (error) {
+            Helper.logger(error);
             const errorData = Helper.getErrorData(error);
             const message = Helper.getErrorMessage(error);
             if (Object.keys(files).length) {
@@ -105,6 +106,7 @@ class BookController implements IBook {
                     return;
                 });
         } catch (error) {
+            Helper.logger(error);
             const errorData = Helper.getErrorData(error);
             const message = Helper.getErrorMessage(error);
             if (Object.keys(files).length) {
@@ -123,6 +125,7 @@ class BookController implements IBook {
                 .limit(5);
             resp.status(200).send(responseSuccess(mostPicked));
         } catch (error) {
+            Helper.logger(error);
             next(new InternalServerErrException());
         }
     }
@@ -144,6 +147,7 @@ class BookController implements IBook {
                 })
             );
         } catch (error) {
+            Helper.logger(error);
             next(new InternalServerErrException());
         }
     }
@@ -164,6 +168,7 @@ class BookController implements IBook {
                     throw error;
                 });
         } catch (error) {
+            Helper.logger(error);
             next(new InternalServerErrException());
         }
     }
@@ -194,6 +199,7 @@ class BookController implements IBook {
             }
             resp.status(200).send(responseSuccess(books));
         } catch (error) {
+            Helper.logger(error);
             next(new InternalServerErrException());
         }
     }
@@ -220,6 +226,7 @@ class BookController implements IBook {
                     throw error;
                 });
         } catch (error) {
+            Helper.logger(error);
             next(new InternalServerErrException());
         }
     }

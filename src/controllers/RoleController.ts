@@ -3,6 +3,7 @@ import Role from '../models/RoleModel';
 import IRoleController from '../interfaces/controller.role.interface';
 import responseSuccess from '../utils/responseSuccess';
 import {InternalServerErrException, NotFoundException} from '../exceptions/ResponseException';
+import Helper from '../utils/Helper';
 
 class RoleController implements IRoleController {
     async getAll(req: Request, resp: Response, next: NextFunction): Promise<void> {
@@ -20,6 +21,7 @@ class RoleController implements IRoleController {
                     throw error;
                 });
         } catch (error) {
+            Helper.logger(error);
             next(new InternalServerErrException());
         }
     }

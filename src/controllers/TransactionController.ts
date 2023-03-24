@@ -1,5 +1,5 @@
 import {Request, Response, NextFunction} from 'express';
-import {BadRequestException, InternalServerErrException} from '../exceptions/ResponseException';
+import {BadRequestException, InternalServerErrException, NotFoundException} from '../exceptions/ResponseException';
 import ITransaction from '../interfaces/controller.transaction.interface';
 import Book from '../models/BookModel';
 import Transaction, {TransactionInput} from '../models/TransactionModel';
@@ -35,6 +35,7 @@ class TransactionController implements ITransaction {
             session.endSession();
             resp.status(200).send(responseSuccess());
         } catch (error) {
+            Helper.logger(error);
             await session.abortTransaction();
             session.endSession();
             const errorData = Helper.getErrorData(error);
@@ -78,6 +79,7 @@ class TransactionController implements ITransaction {
             session.endSession();
             resp.status(200).send(responseSuccess());
         } catch (error) {
+            Helper.logger(error);
             const message = Helper.getErrorMessage(error);
             await session.abortTransaction();
             session.endSession();
@@ -188,6 +190,7 @@ class TransactionController implements ITransaction {
                 })
             );
         } catch (error) {
+            Helper.logger(error);
             next(new InternalServerErrException());
         }
     }
@@ -207,11 +210,15 @@ class TransactionController implements ITransaction {
                     },
                 });
             if (!result) {
-                next(new BadRequestException('Transaksi tidak dtemukan'));
-                return;
+                throw new Error('notfound');
             }
             resp.status(200).send(responseSuccess(result));
         } catch (error) {
+            const msg = Helper.logger(error);
+            if (msg === 'notfound') {
+                next(new NotFoundException('Transaksi tidak dtemukan'));
+                return;
+            }
             next(new InternalServerErrException());
         }
     }

@@ -2,6 +2,7 @@ import {NextFunction, Request, Response} from 'express';
 import User from '../models/UserModel';
 import responseSuccess from '../utils/responseSuccess';
 import {BadRequestException, InternalServerErrException, NotFoundException} from '../exceptions/ResponseException';
+import Helper from '../utils/Helper';
 
 interface IBookmark {
     addItem(req: Request, resp: Response, next: NextFunction): Promise<void>;
@@ -42,6 +43,7 @@ class BookmarkController implements IBookmark {
                     throw error;
                 });
         } catch (error) {
+            Helper.logger(error);
             next(new InternalServerErrException());
         }
     }
@@ -62,6 +64,7 @@ class BookmarkController implements IBookmark {
                     throw error;
                 });
         } catch (error) {
+            Helper.logger(error);
             next(new InternalServerErrException());
         }
     }
@@ -89,6 +92,7 @@ class BookmarkController implements IBookmark {
                     throw error;
                 });
         } catch (error) {
+            Helper.logger(error);
             next(new InternalServerErrException());
         }
     }

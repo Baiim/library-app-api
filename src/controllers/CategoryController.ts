@@ -13,6 +13,7 @@ class CategoryController implements ICategory {
             await category.save();
             resp.status(200).send(responseSuccess(null));
         } catch (error) {
+            Helper.logger(error);
             const errorData = Helper.getErrorData(error);
             if (errorData?.name === 'ValidationError') {
                 next(new BadRequestException(errorData.error[0]));
@@ -38,6 +39,7 @@ class CategoryController implements ICategory {
             }
             next(new BadRequestException('Category tidak ditemukan'));
         } catch (error) {
+            Helper.logger(error);
             const errorData = Helper.getErrorData(error);
             if (errorData?.name === 'ValidationError') {
                 next(new BadRequestException(errorData.error[0]));
@@ -62,6 +64,7 @@ class CategoryController implements ICategory {
                     throw error;
                 });
         } catch (error) {
+            Helper.logger(error);
             next(new InternalServerErrException());
         }
     }
@@ -78,6 +81,7 @@ class CategoryController implements ICategory {
                     throw error;
                 });
         } catch (error) {
+            Helper.logger(error);
             next(new InternalServerErrException());
         }
     }

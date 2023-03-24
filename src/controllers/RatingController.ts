@@ -13,6 +13,7 @@ class RatingController implements IRating {
             await rating.save();
             resp.status(200).send(responseSuccess(null));
         } catch (error) {
+            Helper.logger(error);
             const errorData = Helper.getErrorData(error);
             if (errorData?.name === 'ValidationError') {
                 next(new BadRequestException(errorData.error[0]));
@@ -38,6 +39,7 @@ class RatingController implements IRating {
                 })
             );
         } catch (error) {
+            Helper.logger(error);
             next(new InternalServerErrException());
         }
     }
@@ -55,6 +57,7 @@ class RatingController implements IRating {
             };
             resp.status(200).send(responseSuccess(result));
         } catch (error) {
+            Helper.logger(error);
             next(new InternalServerErrException());
         }
     }
