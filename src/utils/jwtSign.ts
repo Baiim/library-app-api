@@ -16,14 +16,15 @@ class JwtSign {
 
     public createToken() {
         return new Promise((resolve, reject) => {
+            this.payload.role = this.user.id_role.toString();
             const optionsAccessToken = {
                 expiresIn: this.EXPIRES_IN,
-                issuer: 'smartlaundry.com',
+                issuer: 'libraryapp.com',
                 audience: this.user.id,
             };
             const optionsRefreshToken = {
                 expiresIn: 2 * this.EXPIRES_IN,
-                issuer: 'smartlaundry.com',
+                issuer: 'libraryapp.com',
                 audience: this.user.id,
             };
             const payloads = {

@@ -3,6 +3,7 @@ import BookController from '../controllers/BookController';
 import NotAllowedController from '../controllers/NotAllowedController';
 import authMiddleware from '../middlewares/auth.middleware';
 import UploadFile from '../middlewares/multer.middleware';
+import roleMiddleware from '../middlewares/role.middleware';
 
 class BookRoutes extends BaseRouter {
     routes(): void {
@@ -12,6 +13,7 @@ class BookRoutes extends BaseRouter {
             '/book',
             [
                 authJwt,
+                roleMiddleware.verify,
                 new UploadFile('books').uploads([
                     {name: 'cover_book', maxCount: 1},
                     {name: 'book_pdf', maxCount: 1},
@@ -24,6 +26,7 @@ class BookRoutes extends BaseRouter {
             '/book/:id',
             [
                 authJwt,
+                roleMiddleware.verify,
                 new UploadFile('books').uploads([
                     {name: 'cover_book', maxCount: 1},
                     {name: 'book_pdf', maxCount: 1},
@@ -36,7 +39,7 @@ class BookRoutes extends BaseRouter {
         this.router.get('/books-mostpick', authJwt, BookController.getMostPicked);
         this.router.get('/book/:id', authJwt, BookController.get);
         this.router.get('/book-category/:id', authJwt, BookController.getByCategory);
-        this.router.delete('/book/:id', authJwt, BookController.delete);
+        this.router.delete('/book/:id', [authJwt, roleMiddleware.verify], BookController.delete);
 
         //Error 405 handling
         this.router.all('/book', NotAllowedController.error);

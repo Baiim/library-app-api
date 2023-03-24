@@ -11,6 +11,7 @@ import config, {IConfig} from '../utils/config';
 
 const baseUrl = config(process.env.NODE_ENV as keyof IConfig).API_BASE_URl;
 interface DataPayload {
+    role: string;
     aud: string;
 }
 
@@ -183,7 +184,7 @@ class UserController implements IUserController {
             const bearerHeader = req.headers['authorization'];
             const bearerToken = bearerHeader?.split(' ')[1] as string;
             const payload = jwt.decode(bearerToken, {complete: true})?.payload as DataPayload;
-            new JwtSign({id: payload.aud} as UserDocument)
+            new JwtSign({id: payload.aud, id_role: payload.role} as UserDocument)
                 .createToken()
                 .then((response) => resp.status(200).send(responseSuccess(response)))
                 .catch((error) => {
