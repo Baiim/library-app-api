@@ -1,51 +1,44 @@
 import {NextFunction, Request, Response} from 'express';
+import jwt from 'jsonwebtoken';
 import {
     AuthenticationTokenException,
     BadRequestException,
     InternalServerErrException,
 } from '../exceptions/ResponseException';
-import Role from '../models/RoleModel';
 import User from '../models/UserModel';
+
+interface DataPayload {
+    role: string;
+    aud: string;
+}
 
 const verifyUser = async (req: Request, _res: Response, next: NextFunction) => {
     const {id} = req.params;
-    const {verified, email} = req.body;
+    const {verified} = req.body;
+    const bearerHeader = req.headers['authorization'];
+    const bearerToken = bearerHeader?.split(' ')[1] as string;
+    const payload = jwt.decode(bearerToken, {complete: true})?.payload as DataPayload;
 
-    if ((verified || verified === false) && email) {
-        await User.findOne({email})
+    if ((verified || verified === false) && id) {
+        await User.findOne({_id: payload.aud}, '_id')
             .exec()
             .then(async (result) => {
-                if (result) {
-                    if (result.id === id) {
-                        next(
-                            new AuthenticationTokenException('!Ups, tidak bisa melakukan verifikasi pada akun sendiri')
-                        );
-                        return;
-                    }
-                    await Role.findOne({_id: result.id_role})
-                        .exec()
-                        .then((result) => {
-                            if (result && (result.code === 1 || result.code === 0)) {
-                                next();
-                                return;
-                            }
-                            next(
-                                new AuthenticationTokenException('!Ups, role user tidak bisa melakukan verifikasi akun')
-                            );
-                        })
-                        .catch(() => {
-                            next(new InternalServerErrException());
-                        });
+                if (!result) {
+                    next(new AuthenticationTokenException('!Ups, akun anda tidak bisa melakukan verifikasi'));
                     return;
                 }
-                next(new AuthenticationTokenException('!Ups, role user tidak bisa melakukan verifikasi akun'));
+                if (result.id === id) {
+                    next(new AuthenticationTokenException('!Ups, tidak bisa melakukan verifikasi pada akun sendiri'));
+                    return;
+                }
+                next();
             })
             .catch(() => {
                 next(new InternalServerErrException());
             });
         return;
     }
-    next(new BadRequestException('verify dan id role harus dikirim'));
+    next(new BadRequestException('verify dan id user harus dikirim'));
 };
 
 export default verifyUser;

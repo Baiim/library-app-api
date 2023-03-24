@@ -5,6 +5,7 @@ import UserController from '../controllers/UserController';
 import NotAllowedController from '../controllers/NotAllowedController';
 import AuthMiddleware from '../middlewares/auth.middleware';
 import verifyUser from '../middlewares/verifyUser.middleware';
+import roleMiddleware from '../middlewares/role.middleware';
 
 class UserRoutes extends BaseRouter {
     routes(): void {
@@ -24,7 +25,11 @@ class UserRoutes extends BaseRouter {
         this.router.delete('/user/:id', authJwt, UserController.delete);
 
         this.router.get('/refreshToken', authRefreshToken, UserController.refreshToken);
-        this.router.put('/user-verify/:id', [authJwt, verifyUser], UserController.update);
+        this.router.put(
+            '/user-verify/:id',
+            [authJwt, roleMiddleware.verifySuperAdmin, verifyUser],
+            UserController.update
+        );
 
         //Error 405 handling
         this.router.all('/users/register', NotAllowedController.error);
