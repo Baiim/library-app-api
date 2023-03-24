@@ -91,14 +91,13 @@ class UserController implements IUserController {
             await User.findOneAndUpdate({_id: id}, userInput)
                 .exec()
                 .then((result) => {
-                    if (result) {
-                        const imgPath = result.imgUrl?.split('/');
-                        const imgLink = imgPath?.splice(3, imgPath.length)?.join('/');
-                        if (imgLink) unlinkSync(imgLink);
-                        resp.status(200).send(responseSuccess(null));
-                        return;
+                    if (!result) {
+                        throw new Error('notfound');
                     }
-                    throw new Error('notfound');
+                    const imgPath = Helper.getAssetDir(result.imgUrl);
+                    if (imgPath && userInput.imgUrl) unlinkSync(imgPath);
+                    resp.status(200).send(responseSuccess(null));
+                    return;
                 })
                 .catch((error) => {
                     throw error;
@@ -127,16 +126,13 @@ class UserController implements IUserController {
             await User.findOneAndDelete({_id: id})
                 .exec()
                 .then((result) => {
-                    if (result) {
-                        if (result.imgUrl) {
-                            const imgPath = result.imgUrl.split('/');
-                            const imgLink = imgPath.splice(3, imgPath.length).join('/');
-                            unlinkSync(imgLink);
-                        }
-                        resp.status(200).send(responseSuccess(null));
+                    if (!result) {
+                        next(new BadRequestException('User tidak ditemukan'));
                         return;
                     }
-                    next(new BadRequestException('User tidak ditemukan'));
+                    const imgPath = Helper.getAssetDir(result.imgUrl);
+                    if (imgPath) unlinkSync(imgPath);
+                    resp.status(200).send(responseSuccess(null));
                 })
                 .catch((error) => {
                     throw error;
@@ -150,7 +146,7 @@ class UserController implements IUserController {
     async get(req: Request, resp: Response, next: NextFunction): Promise<void> {
         try {
             const {id} = req.params;
-            const result = await User.findOne({_id: id}, '-password -__v -bookmark');
+            const result = await User.findOne({_id: id}, '-password -__v -bookmark').populate('id_role', 'name');
             if (result) {
                 resp.status(200).send(responseSuccess(result));
                 return;

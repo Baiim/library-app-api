@@ -39,6 +39,11 @@ class Helper {
         return `${baseUrl}/public/assets/${directory}/${reqFile?.filename}`;
     }
 
+    public getAssetDir(url?: string) {
+        const path = url?.split('/');
+        return path?.splice(3, path.length)?.join('/');
+    }
+
     /** Utility to get string today date */
     public getTodayDate() {
         let today = '';

@@ -102,7 +102,7 @@ const userSchema = new Schema(
             unique: true,
         },
         id_role: {
-            type: Schema.Types.String,
+            type: Schema.Types.ObjectId,
             required: [true, 'ID role harus diisi'],
             ref: 'Role',
             index: false,
