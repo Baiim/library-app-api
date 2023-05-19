@@ -58,7 +58,7 @@ var config = {
         {
             "_id": 1,
             "host": "primary:27017",
-            "priority": 1
+            "priority": 3
         },
         {
             "_id": 2,
@@ -68,7 +68,7 @@ var config = {
         {
             "_id": 3,
             "host": "replica02:27017",
-            "priority": 3
+            "priority": 1
         }
     ]
 };

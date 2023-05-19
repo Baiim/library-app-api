@@ -6,8 +6,9 @@ import User, {UserDocument, UserInput} from '../models/UserModel';
 import JwtSign from '../utils/jwtSign';
 import Helper from '../utils/Helper';
 import responseSuccess from '../utils/responseSuccess';
-import {BadRequestException, InternalServerErrException, NotFoundException} from '../exceptions/ResponseException';
+import {AuthenticationTokenException, BadRequestException, InternalServerErrException, NotFoundException} from '../exceptions/ResponseException';
 import config, {IConfig} from '../utils/config';
+import client from '../utils/initRedis';
 
 const baseUrl = config(process.env.NODE_ENV as keyof IConfig).API_BASE_URl;
 interface DataPayload {
@@ -66,6 +67,31 @@ class UserController implements IUserController {
             const errorData = Helper.getErrorData(error);
             if (errorData?.name === 'ValidationError') {
                 next(new BadRequestException(errorData.error[0]));
+                return;
+            }
+            next(new InternalServerErrException());
+        }
+    }
+
+    logout(req: Request, res: Response, next: NextFunction): void {
+        try {
+            const { dataToken } = req.body;
+            const bearerHeader = req.headers['authorization'];
+            if (!bearerHeader) throw new Error('auth');
+            const bearerToken = bearerHeader.split(' ')[1];
+            const payload = jwt.decode(bearerToken, { complete: true })?.payload as DataPayload;
+            client.lRem(payload.aud, 1, JSON.stringify(dataToken))
+                .then(reply => {
+                    if (reply > 0) res.status(200).send(responseSuccess());
+                    else throw new Error('auth');
+                })
+                .catch(() => {
+                    throw new Error('Internal Server Error');
+                });
+        } catch (error) {
+            const errorData = Helper.logger(error);
+            if (errorData === 'auth') {
+                next(new AuthenticationTokenException());
                 return;
             }
             next(new InternalServerErrException());
