@@ -30,10 +30,12 @@ class UserRoutes extends BaseRouter {
             [authJwt, roleMiddleware.verifySuperAdmin, verifyUser],
             UserController.update
         );
+        this.router.post('users/logout', UserController.logout);
 
         //Error 405 handling
         this.router.all('/users/register', NotAllowedController.error);
         this.router.all('/users/login', NotAllowedController.error);
+        this.router.all('/users/logout', NotAllowedController.error);
         this.router.all('/users', NotAllowedController.error);
         this.router.all('/user/:id', NotAllowedController.error);
         this.router.all('/refreshToken', NotAllowedController.error);
