@@ -30,7 +30,7 @@ class UserRoutes extends BaseRouter {
             [authJwt, roleMiddleware.verifySuperAdmin, verifyUser],
             UserController.update
         );
-        this.router.post('users/logout', UserController.logout);
+        this.router.post('/users/logout', UserController.logout);
 
         //Error 405 handling
         this.router.all('/users/register', NotAllowedController.error);
