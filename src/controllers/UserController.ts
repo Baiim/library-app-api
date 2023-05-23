@@ -6,7 +6,12 @@ import User, {UserDocument, UserInput} from '../models/UserModel';
 import JwtSign from '../utils/jwtSign';
 import Helper from '../utils/Helper';
 import responseSuccess from '../utils/responseSuccess';
-import {AuthenticationTokenException, BadRequestException, InternalServerErrException, NotFoundException} from '../exceptions/ResponseException';
+import {
+    AuthenticationTokenException,
+    BadRequestException,
+    InternalServerErrException,
+    NotFoundException,
+} from '../exceptions/ResponseException';
 import config, {IConfig} from '../utils/config';
 import client from '../utils/initRedis';
 
@@ -75,15 +80,16 @@ class UserController implements IUserController {
 
     logout(req: Request, res: Response, next: NextFunction): void {
         try {
-            const { dataToken } = req.body;
+            const {dataToken} = req.body;
             const bearerHeader = req.headers['authorization'];
             if (!bearerHeader) throw new Error('auth');
             const bearerToken = bearerHeader.split(' ')[1];
-            const payload = jwt.decode(bearerToken, { complete: true })?.payload as DataPayload;
-            client.lRem(payload.aud, 1, JSON.stringify(dataToken))
-                .then(reply => {
+            const payload = jwt.decode(bearerToken, {complete: true})?.payload as DataPayload;
+            client
+                .lRem(payload.aud, 1, JSON.stringify(dataToken))
+                .then((reply) => {
                     if (reply > 0) res.status(200).send(responseSuccess());
-                    else throw new Error('auth');
+                    else next(new AuthenticationTokenException());
                 })
                 .catch(() => {
                     throw new Error('Internal Server Error');
