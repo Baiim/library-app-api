@@ -1,0 +1,32 @@
+name: Deploy
+
+on: 
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: checkout
+      uses: actions/checkout@v1
+
+    - name: Deploy via SSH
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        port: ${{ secrets.PORT }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSHKEY }}
+        script: | 
+          cd ~/absensi_mobile/api-absensi-mobile/
+          docker-compose down
+          git pull origin development
+          cd keys
+          rm mongo-replica-set.key
+          openssl rand -base64 741 > mongo-replica-set.key
+          sudo chmod 600 mongo-replica-set.key
+          cd ..
+          docker-compose up -d
