@@ -7,14 +7,14 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-22.04.2
+    runs-on: ubuntu-20.04
 
     steps:
     - name: checkout
       uses: actions/checkout@v2
 
     - name: Deploy via SSH
-      uses: appleboy/ssh-action@developmet
+      uses: appleboy/ssh-action@0.1.10
       with:
         host: '103.59.95.40'
         username: 'ijul'
