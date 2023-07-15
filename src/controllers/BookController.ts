@@ -163,7 +163,7 @@ class BookController implements IBook {
                         rating: {$map: {input: '$ratings', in: '$$this.avgRating'}},
                     },
                 },
-                {$sort: {createdAt: 1}},
+                {$sort: {createdAt: -1}},
                 {
                     //Select the field only needed
                     $project: {

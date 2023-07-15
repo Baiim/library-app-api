@@ -183,6 +183,7 @@ class TransactionController implements ITransaction {
                         },
                     },
                 },
+                {$sort: {createdAt: -1}},
                 //remove the data not needs in the response
                 {$unset: ['id_user', 'id_book', 'dateFrom', 'dateTo', 'createdAt', 'updatedAt', '__v']},
                 {
@@ -191,7 +192,6 @@ class TransactionController implements ITransaction {
                         data: [{$skip: ((page as number) - 1) * (limit as number)}, {$limit: (limit as number) * 1}],
                     },
                 },
-                {$sort: {createdAt: -1}},
             ]).exec();
             const count = await Transaction.countDocuments(id_user ? {id_user: id_user} : {});
             resp.status(200).send(
