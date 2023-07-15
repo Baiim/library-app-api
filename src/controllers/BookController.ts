@@ -136,6 +136,7 @@ class BookController implements IBook {
             const {page = 1, limit = 10} = req.query;
             const books = await Book.aggregate([
                 {
+                    // lookup to rating
                     $lookup: {
                         from: 'rating',
                         let: {bookId: '$_id'},
