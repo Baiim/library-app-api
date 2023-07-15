@@ -2,26 +2,24 @@ name: Deploy
 
 on: 
   push:
-    branches: [ master ]
+    branches: [ development ]
 
 jobs:
   build:
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04.2
 
     steps:
     - name: checkout
       uses: actions/checkout@v1
 
     - name: Deploy via SSH
-      uses: appleboy/ssh-action@master
+      uses: appleboy/ssh-action@developmet
       with:
-        host: ${{ secrets.HOST }}
-        port: ${{ secrets.PORT }}
-        username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.SSHKEY }}
+        host: '103.59.95.40'
+        username: 'ijul'
         script: | 
-          cd ~/absensi_mobile/api-absensi-mobile/
+          cd ~/app/library-app-api
           docker-compose down
           git pull origin development
           cd keys
