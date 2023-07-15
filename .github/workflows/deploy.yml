@@ -18,6 +18,7 @@ jobs:
       with:
         host: '103.59.95.40'
         username: 'ijul'
+        password: 'Qweqwe123'
         script: | 
           cd ~/app/library-app-api
           docker-compose down
