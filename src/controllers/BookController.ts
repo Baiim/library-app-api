@@ -134,17 +134,62 @@ class BookController implements IBook {
     async getAll(req: Request, resp: Response, next: NextFunction): Promise<void> {
         try {
             const {page = 1, limit = 10} = req.query;
-            const books = await Book.find()
-                .select('title author year imgUrl publisher')
-                .limit((limit as number) * 1)
-                .skip(((page as number) - 1) * (limit as number))
-                .sort('-createdAt');
+            const books = await Book.aggregate([
+                {
+                    $lookup: {
+                        from: 'rating',
+                        let: {bookId: '$_id'},
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: {
+                                        $and: [{$eq: ['$id_book', '$$bookId']}],
+                                    },
+                                },
+                            },
+                            {
+                                $group: {
+                                    _id: null,
+                                    avgRating: {$avg: '$size'},
+                                },
+                            },
+                        ],
+                        as: 'ratings',
+                    },
+                },
+                {
+                    //Getting only number avgRating and save it to new field called rating
+                    $addFields: {
+                        rating: {$map: {input: '$ratings', in: '$$this.avgRating'}},
+                    },
+                },
+                {$sort: {createdAt: 1}},
+                {
+                    //Select the field only needed
+                    $project: {
+                        title: '$title',
+                        author: '$author',
+                        year: '$year',
+                        imgUrl: '$imgUrl',
+                        publisher: '$publisher',
+                        rating: {$trunc: [{$arrayElemAt: ['$rating', 0]}, 1]},
+                    },
+                },
+                {
+                    //Handle pagination
+                    $facet: {
+                        data: [{$skip: ((page as number) - 1) * (limit as number)}, {$limit: (limit as number) * 1}],
+                    },
+                },
+            ]);
             const count = await Book.countDocuments();
             resp.status(200).send(
                 responseSuccess({
-                    content: books,
+                    content: books?.[0]?.data ?? [],
                     totalPage: Math.ceil(count / (limit as number)),
                     currentPage: parseInt(page as string),
+                    totalItem: count,
+                    perPage: limit,
                 })
             );
         } catch (error) {

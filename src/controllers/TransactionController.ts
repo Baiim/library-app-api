@@ -1,4 +1,5 @@
 import {Request, Response, NextFunction} from 'express';
+import mongoose from 'mongoose';
 import {BadRequestException, InternalServerErrException, NotFoundException} from '../exceptions/ResponseException';
 import ITransaction from '../interfaces/controller.transaction.interface';
 import Book from '../models/BookModel';
@@ -94,8 +95,19 @@ class TransactionController implements ITransaction {
 
     async getAll(req: Request, resp: Response, next: NextFunction): Promise<void> {
         try {
-            const {page = 1, limit = 10} = req.query;
+            const {page = 1, limit = 10, id_user = undefined} = req.query;
             const transactions = await Transaction.aggregate([
+                {
+                    $match: {
+                        $expr: {
+                            $cond: {
+                                if: {$eq: [id_user, undefined]},
+                                then: true,
+                                else: {$eq: ['$id_user', new mongoose.Types.ObjectId(id_user as string)]},
+                            },
+                        },
+                    },
+                },
                 {
                     //Populate data book
                     $lookup: {
@@ -181,12 +193,14 @@ class TransactionController implements ITransaction {
                 },
                 {$sort: {createdAt: -1}},
             ]).exec();
-            const count = await Book.countDocuments();
+            const count = await Transaction.countDocuments(id_user ? {id_user: id_user} : {});
             resp.status(200).send(
                 responseSuccess({
                     content: transactions?.[0]?.data ?? [],
                     totalPage: Math.ceil(count / (limit as number)),
                     currentPage: parseInt(page as string),
+                    totalItem: count,
+                    perPage: limit,
                 })
             );
         } catch (error) {

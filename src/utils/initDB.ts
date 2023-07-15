@@ -1,11 +1,13 @@
 /* eslint-disable no-console */
 import mongoose from 'mongoose';
+import {config as dotenv} from 'dotenv';
 import config, {IConfig} from './config';
+
+dotenv();
 
 const db = config(process.env.NODE_ENV as keyof IConfig);
 
 const initDB = () => {
-    console.log('db?.DATABASE', db?.DATABASE);
     mongoose.Promise = global.Promise;
     mongoose
         .connect(db?.DATABASE || '')

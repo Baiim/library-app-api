@@ -92,7 +92,7 @@ class UserController implements IUserController {
                     else next(new AuthenticationTokenException());
                 })
                 .catch(() => {
-                    throw new Error('Internal Server Error');
+                    next(new InternalServerErrException());
                 });
         } catch (error) {
             const errorData = Helper.logger(error);

@@ -4,7 +4,6 @@ import {config as dotenv} from 'dotenv';
 
 dotenv();
 const NODE_ENV = process.env.NODE_ENV as string;
-console.log('NODE_ENV', NODE_ENV);
 
 const socket = NODE_ENV === 'production' ? {host: 'redis_client'} : {port: 6379, host: '127.0.0.1'};
 
@@ -15,7 +14,7 @@ const client = redis.createClient({
 // const client = redis.createClient({
 //     socket: {
 //         port: 6379,
-//         host: '127.0.0.1',
+//         host: '103.59.95.40',
 //     },
 // });
 
