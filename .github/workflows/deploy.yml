@@ -22,6 +22,8 @@ jobs:
         script: | 
           cd ~/app/library-app-api
           docker-compose down
+          docker image rm api-library-app:latest
+          docker images
           git checkout development
           git pull origin development
           cd keys
